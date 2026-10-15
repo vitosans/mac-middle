@@ -14,7 +14,7 @@ A small macOS menu bar app that lets you minimize a window by middle-clicking it
 
 ## Install and use
 
-1. Download **Mac-Middle-v0.1.0-universal.zip** from the [latest release](https://github.com/vitosans/mac-middle/releases/latest) and double-click it to unzip.
+1. Download the **Mac-Middle-v…-universal.zip** file from the [latest release](https://github.com/vitosans/mac-middle/releases/latest) and double-click it to unzip.
 2. Drag **Mac Middle.app** to **Applications**, then open it there.
 3. Allow **Mac Middle** in **System Settings → Privacy & Security → Accessibility**. If it is missing, click **+** and select the app from Applications.
 4. Look for the mouse icon in the menu bar, then middle-click an empty part of a window's title bar or its title text. On most mice, pressing the scroll wheel sends a middle click.
@@ -57,6 +57,23 @@ open "build/Mac Middle.app"
 The build script compiles Swift directly and creates an ad-hoc signed app at `build/Mac Middle.app`. It builds for the Mac's current architecture, generates the application icon from `mac-middle.png` using macOS tools, and requires no third-party dependencies. Use `bash scripts/build.sh --universal` to build for both Apple silicon and Intel.
 
 GitHub Actions runs the unit tests, builds the app, validates its bundle metadata, and verifies its ad-hoc signature on a macOS runner for every push and pull request. You can also run the workflow manually from the repository's **Actions** tab. CI does not exercise global mouse input or real Accessibility responses.
+
+CodeQL scans Swift code and GitHub Actions on pushes to `main`, pull requests, and weekly. Dependabot checks for action updates weekly. Report vulnerabilities privately using the [security policy](SECURITY.md).
+
+## Publishing a release
+
+1. Update `CFBundleShortVersionString` and increment `CFBundleVersion` in `Info.plist`.
+2. Merge the changes into `main` after CI passes. From **Actions → Release → Run workflow**, run a packaging rehearsal on `main`; it uploads workflow artifacts without publishing a release.
+3. On the checked commit, create and push a matching version tag:
+
+   ```sh
+   git tag -a v0.2.0 -m "Mac Middle v0.2.0"
+   git push origin v0.2.0
+   ```
+
+The Release workflow checks that the commit belongs to `main` and the tag matches the app version, runs tests, builds a universal app, verifies the bundle, and publishes a GitHub release with the ZIP and SHA-256 checksum. Existing releases are not overwritten. Releases support stable `vMAJOR.MINOR.PATCH` tags.
+
+To prepare the same files locally, run `bash scripts/prepare-release.sh`. Output is written to `build/release/`. Manually check real app behavior before tagging; automated checks do not exercise global input or Accessibility permissions.
 
 | File | Purpose |
 | --- | --- |
