@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit tests and app build
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Show Swift version
+        run: swift --version
+      - name: Run unit tests
+        run: swift test
+      - name: Build application
+        run: bash scripts/build.sh --universal
+      - name: Verify supported architectures
+        run: |
+          xcrun lipo "build/Mac Middle.app/Contents/MacOS/MacMiddle" -verify_arch arm64
+          xcrun lipo "build/Mac Middle.app/Contents/MacOS/MacMiddle" -verify_arch x86_64
+      - name: Validate bundle metadata
+        run: plutil -lint Info.plist "build/Mac Middle.app/Contents/Info.plist"
+      - name: Verify application signature
+        run: codesign --verify --strict --verbose=2 "build/Mac Middle.app"
