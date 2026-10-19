@@ -23,7 +23,7 @@ The download is ad-hoc signed and is not notarized by Apple. If macOS blocks the
 
 Click the mouse icon in the menu bar to see the app's status. Use **Enabled** to pause or resume, **Grant Accessibility Permission…** to open the permission settings, and **Quit Mac Middle** to stop it. The app has no Dock icon or main window.
 
-To start it at login, add the installed app under **System Settings → General → Login Items**. To uninstall, quit the app, remove its login item if present, and delete the app.
+To start it at login, add the installed app under **System Settings → General → Login Items**. To update, quit the app, replace it in Applications with the new version, and reopen it; if it asks for Accessibility permission again, follow the reset step in [Troubleshooting](#troubleshooting). To uninstall, quit the app, remove its login item if present, run `tccutil reset Accessibility local.mac-middle` to remove its Accessibility approval, and delete the app.
 
 ## Behavior and limits
 
@@ -39,7 +39,13 @@ Compilation alone does not verify title-bar detection across apps. Check Finder,
 
 - **Accessibility permission required:** enable the app in Accessibility settings. If it is missing, add it with the settings panel's **+** button.
 - **Unable to listen:** quit and reopen the app after granting permission.
-- **Stopped working after a rebuild or move:** macOS may require you to remove the old Accessibility entry, add the current app, and reopen it.
+- **Asks for permission again, or stopped working after an update, rebuild, or move:** the app is ad-hoc signed, so macOS ties the Accessibility approval to that exact build. A new copy may not match the old entry, even if Mac Middle still appears enabled. Quit the app, reset its approval in Terminal, then reopen it from Applications and grant permission again:
+
+  ```sh
+  tccutil reset Accessibility local.mac-middle
+  ```
+
+  Alternatively, select Mac Middle in the Accessibility list, click **−**, and add the current app with **+**. Quit and reopen the app after granting permission.
 - **Only some apps work:** custom title bars and incomplete Accessibility information can prevent detection. Try Finder or Terminal to distinguish an app-specific limitation from a permission issue.
 - **Middle click does nothing:** confirm your mouse software sends a middle-button event rather than mapping the button to another action.
 
